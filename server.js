@@ -1,33 +1,39 @@
 import express from "express";
+import fetch from "node-fetch";
 import cors from "cors";
-import bodyParser from "body-parser";
-import OpenAI from "openai";
 
 const app = express();
-app.use(cors());
-app.use(bodyParser.json());
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+// Allow your GitHub Pages domain
+app.use(cors({
+  origin: "https://ricchkrixx.github.io",
+}));
 
-app.post("/ask", async (req, res) => {
-  const { prompt } = req.body;
+app.use(express.json());
 
+app.post("/chat", async (req, res) => {
+  const { message } = req.body;
   try {
-    const completion = await client.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: "You are AIVA, a friendly AI learning assistant." },
-        { role: "user", content: prompt }
-      ]
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: "gpt-3.5-turbo",
+        messages: [{ role: "user", content: message }]
+      })
     });
-    res.json({ reply: completion.choices[0].message.content });
+    const data = await response.json();
+    res.json(data);
   } catch (error) {
-    console.error(error);
-    app.get("/", (req, res) => {res.send("AIVA is running!");});
-    res.status(500).json({ error: "Error from AIVA backend." });
+    res.status(500).json({ error: error.message });
   }
 });
 
-app.listen(3000, () => console.log("✅ AIVA backend running"));
+app.get("/", (req, res) => {
+  res.send("✅ AIVA backend is running!");
+});
+
+app.listen(3000, () => console.log("Server running on port 3000"));
