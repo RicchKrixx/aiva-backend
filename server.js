@@ -25,6 +25,7 @@ app.post("/ask", async (req, res) => {
     res.json({ reply: completion.choices[0].message.content });
   } catch (error) {
     console.error(error);
+    app.get("/", (req, res) => {res.send("AIVA is running!");});
     res.status(500).json({ error: "Error from AIVA backend." });
   }
 });
