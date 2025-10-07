@@ -4,11 +4,8 @@ import cors from "cors";
 
 const app = express();
 
-// Allow your GitHub Pages domain
-app.use(cors({
-  origin: "https://ricchkrixx.github.io",
-}));
-
+// Allow GitHub Pages or any origin (temporary)
+app.use(cors());
 app.use(express.json());
 
 app.post("/chat", async (req, res) => {
@@ -25,6 +22,7 @@ app.post("/chat", async (req, res) => {
         messages: [{ role: "user", content: message }]
       })
     });
+
     const data = await response.json();
     res.json(data);
   } catch (error) {
@@ -36,4 +34,5 @@ app.get("/", (req, res) => {
   res.send("✅ AIVA backend is running!");
 });
 
-app.listen(3000, () => console.log("Server running on port 3000"));
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
